@@ -1,0 +1,80 @@
+---
+title: 'Week 9 Coding Part 1: Multiple Linear regression continued'
+author: "Elmera Azadpour"
+date: "11/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(GGally)
+library(stargazer)
+```
+
+## Data visualization using 'GGally' function to explore relationships and correllation values
+```{r, message=FALSE, warning=FALSE}
+penguins %>% 
+  ggpairs()
+```
+
+## Let's parse this into chunks that are a bit more digestable 
+```{r, message=FALSE, warning=FALSE}
+penguins %>% 
+  select(species, bill_length_mm:body_mass_g) %>% 
+  ggpairs(aes(color = species))
+# looks like within groups, between quantitve vairables, linear relationship seems to make sense
+# doesn't look like lots of variables are highly correlated, except for maybe flipper length and body mass -- where the overall correlation is 0.871 and highest is Gentoo with 0.7. 
+# not super high correlations to cause concerns about colinearity 
+```
+
+## Build a few different models: penguin mass as dependent variable
+```{r}
+# 1) predictor vairbles: flipper length and species
+lm1 <- lm(body_mass_g ~ flipper_length_mm + species, data = penguins)
+lm1
+
+# 2) flipper length, species and sex
+lm2 <- lm(body_mass_g ~ flipper_length_mm + species + sex, data = penguins)
+lm2
+
+# 3) flipper length, species, sex and bill length
+lm3 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm, data = penguins)
+lm3
+
+# 4) flipper length, species, sex, bill length and island
+lm4 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm + island, data = penguins)
+lm4
+```
+
+## Looking at model AIC scoring, lower AIC = better the balance/model
+```{r}
+AIC(lm1)
+AIC(lm2)
+AIC(lm3) # AIC, based on these 4 models, is lowest = best balance of model fit and model complexity
+AIC(lm4) # adding this was not worth the increased complexity
+```
+
+## Use 'stargazer' package for a table with multiple model outputs 
+```{r, results = 'asis'}
+stargazer(lm1, lm3, lm4, type = "html")
+```
+
+## Omitted variable bias
+```{r}
+ggplot(penguins, aes(x= flipper_length_mm, 
+                     y= bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+## Let's incldue species this time though
+```{r}
+ggplot(penguins, aes(x= flipper_length_mm, 
+                     y= bill_depth_mm,
+                     group = species)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+```
+## END OF PART 1 - EA 
