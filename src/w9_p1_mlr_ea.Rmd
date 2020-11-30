@@ -77,4 +77,3 @@ ggplot(penguins, aes(x= flipper_length_mm,
   geom_point(aes(color = species)) +
   geom_smooth(method = "lm")
 ```
-## END OF PART 1 - EA 
